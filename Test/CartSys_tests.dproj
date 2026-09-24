@@ -1,15 +1,15 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{BD89F60B-548F-477D-84A6-6B992C5E6E60}</ProjectGuid>
+        <ProjectGuid>{62F81EF9-8FFD-437D-9E9D-ACE0804F31CF}</ProjectGuid>
         <ProjectVersion>20.1</ProjectVersion>
-        <FrameworkType>VCL</FrameworkType>
+        <FrameworkType>None</FrameworkType>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
-        <ProjectName Condition="'$(ProjectName)'==''">CartSys_CRUD</ProjectName>
-        <TargetedPlatforms>3</TargetedPlatforms>
-        <AppType>Application</AppType>
-        <MainSource>CartSys_CRUD.dpr</MainSource>
+        <ProjectName Condition="'$(ProjectName)'==''">CartSys_tests</ProjectName>
+        <TargetedPlatforms>1</TargetedPlatforms>
+        <AppType>Console</AppType>
+        <MainSource>CartSys_tests.dpr</MainSource>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
         <Base>true</Base>
@@ -35,27 +35,9 @@
         <Cfg_1>true</Cfg_1>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win64)'!=''">
-        <Cfg_1_Win64>true</Cfg_1_Win64>
-        <CfgParent>Cfg_1</CfgParent>
-        <Cfg_1>true</Cfg_1>
-        <Base>true</Base>
-    </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
         <Cfg_2>true</Cfg_2>
         <CfgParent>Base</CfgParent>
-        <Base>true</Base>
-    </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
-        <Cfg_2_Win32>true</Cfg_2_Win32>
-        <CfgParent>Cfg_2</CfgParent>
-        <Cfg_2>true</Cfg_2>
-        <Base>true</Base>
-    </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
-        <Cfg_2_Win64>true</Cfg_2_Win64>
-        <CfgParent>Cfg_2</CfgParent>
-        <Cfg_2>true</Cfg_2>
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
@@ -66,29 +48,22 @@
         <DCC_S>false</DCC_S>
         <DCC_F>false</DCC_F>
         <DCC_K>false</DCC_K>
-        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
+        <UsingDelphiRTL>true</UsingDelphiRTL>
         <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
-        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
-        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
-        <SanitizedProjectName>CartSys_CRUD</SanitizedProjectName>
+        <Icns_MainIcns>$(BDS)\bin\delphi_PROJECTICNS.icns</Icns_MainIcns>
+        <DCC_UnitSearchPath>$(DUnitX);$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <SanitizedProjectName>CartSys_tests</SanitizedProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
-        <DCC_UsePackage>dclRBIBE2329;vclwinx;rbRAP2329;rbDBE2329;fmx;vclie;DbxCommonDriver;bindengine;IndyIPCommon;VCLRESTComponents;FireDACCommonODBC;FireDACCommonDriver;appanalytics;IndyProtocols;vclx;Skia.Package.RTL;IndyIPClient;dbxcds;vcledge;rbIDE2329;bindcompvclwinx;rbUSERDesign2329;rbUSER2329;bindcompfmx;inetdb;rbDAD2329;ibmonitor;FireDACSqliteDriver;DbxClientDriver;dclRBFireDAC2329;soapmidas;rbDIDE2329;vclactnband;fmxFireDAC;dbexpress;rbWebTier2329;DBXMySQLDriver;VclSmp;inet;vcltouch;fmxase;dbrtl;Skia.Package.FMX;fmxdae;dclRBDBE2329;FireDACMSAccDriver;CustomIPTransport;rbFireDAC2329;vcldsnap;DBXInterBaseDriver;rbCloudSC2329;IndySystem;rbServer2329;rbCIDE2329;rbADO2329;Skia.Package.VCL;vcldb;ibxbindings;rbRTL2329;vclFireDAC;bindcomp;FireDACCommon;IndyCore;RESTBackendComponents;rbClient2329;bindcompdbx;rtl;FireDACMySQLDriver;rbRCL2329;FireDACADSDriver;RESTComponents;DBXSqliteDriver;vcl;IndyIPServer;dsnapxml;dsnapcon;adortl;rbServiceCore2329;rbRIDE2329;dclRBADO2329;vclimg;rbIBE2329;FireDACPgDriver;FireDAC;inetdbxpress;xmlrtl;tethering;ibxpress;bindcompvcl;dsnap;rbRest2329;CloudService;rbDB2329;vclib;fmxobj;bindcompvclsmp;soaprtl;rbBDE2329;soapserver;FireDACIBDriver;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_UsePackage>dclRBIBE2329;vclwinx;rbRAP2329;rbDBE2329;fmx;vclie;DbxCommonDriver;bindengine;IndyIPCommon;VCLRESTComponents;FireDACCommonODBC;FireDACCommonDriver;appanalytics;IndyProtocols;vclx;Skia.Package.RTL;TMSVCLUIPackPkgWiz;IndyIPClient;dbxcds;vcledge;rbIDE2329;bindcompvclwinx;rbUSERDesign2329;rbUSER2329;bindcompfmx;TMSVCLUIPackPkgEx;inetdb;rbDAD2329;ibmonitor;FireDACSqliteDriver;DbxClientDriver;dclRBFireDAC2329;soapmidas;rbDIDE2329;vclactnband;fmxFireDAC;dbexpress;rbWebTier2329;DBXMySQLDriver;TMSVCLUIPackPkg;VclSmp;inet;vcltouch;fmxase;dbrtl;Skia.Package.FMX;fmxdae;dclRBDBE2329;FireDACMSAccDriver;CustomIPTransport;rbFireDAC2329;vcldsnap;DBXInterBaseDriver;rbCloudSC2329;IndySystem;rbServer2329;rbCIDE2329;TMSVCLUIPackPkgXls;rbADO2329;Skia.Package.VCL;vcldb;ibxbindings;rbRTL2329;vclFireDAC;bindcomp;FireDACCommon;IndyCore;RESTBackendComponents;rbClient2329;bindcompdbx;rtl;FireDACMySQLDriver;rbRCL2329;FireDACADSDriver;RESTComponents;DBXSqliteDriver;vcl;IndyIPServer;dsnapxml;dsnapcon;adortl;rbServiceCore2329;rbRIDE2329;dclRBADO2329;vclimg;rbIBE2329;FireDACPgDriver;FireDAC;inetdbxpress;xmlrtl;tethering;ibxpress;bindcompvcl;dsnap;rbRest2329;CloudService;rbDB2329;vclib;fmxobj;bindcompvclsmp;soaprtl;rbBDE2329;soapserver;FireDACIBDriver;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
-        <DCC_UsePackage>dclRBIBE2329;vclwinx;rbRAP2329;rbDBE2329;fmx;vclie;DbxCommonDriver;bindengine;IndyIPCommon;VCLRESTComponents;FireDACCommonODBC;FireDACCommonDriver;appanalytics;IndyProtocols;vclx;IndyIPClient;dbxcds;vcledge;rbIDE2329;bindcompvclwinx;rbUSERDesign2329;rbUSER2329;bindcompfmx;inetdb;rbDAD2329;ibmonitor;FireDACSqliteDriver;DbxClientDriver;soapmidas;rbDIDE2329;vclactnband;fmxFireDAC;dbexpress;rbWebTier2329;DBXMySQLDriver;VclSmp;inet;vcltouch;fmxase;dbrtl;fmxdae;dclRBDBE2329;FireDACMSAccDriver;CustomIPTransport;rbFireDAC2329;vcldsnap;DBXInterBaseDriver;rbCloudSC2329;IndySystem;rbServer2329;rbCIDE2329;rbADO2329;Skia.Package.VCL;vcldb;ibxbindings;rbRTL2329;vclFireDAC;bindcomp;FireDACCommon;IndyCore;RESTBackendComponents;rbClient2329;bindcompdbx;rtl;FireDACMySQLDriver;rbRCL2329;FireDACADSDriver;RESTComponents;DBXSqliteDriver;vcl;IndyIPServer;dsnapxml;dsnapcon;adortl;rbServiceCore2329;rbRIDE2329;dclRBADO2329;vclimg;rbIBE2329;FireDACPgDriver;FireDAC;inetdbxpress;xmlrtl;tethering;ibxpress;bindcompvcl;dsnap;rbRest2329;CloudService;rbDB2329;vclib;fmxobj;bindcompvclsmp;soaprtl;rbBDE2329;soapserver;FireDACIBDriver;$(DCC_UsePackage)</DCC_UsePackage>
-        <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
-        <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <DCC_UsePackage>dclRBIBE2329;vclwinx;rbRAP2329;rbDBE2329;fmx;vclie;DbxCommonDriver;bindengine;IndyIPCommon;VCLRESTComponents;FireDACCommonODBC;FireDACCommonDriver;appanalytics;IndyProtocols;vclx;TMSVCLUIPackPkgWiz;IndyIPClient;dbxcds;vcledge;rbIDE2329;bindcompvclwinx;rbUSERDesign2329;rbUSER2329;bindcompfmx;TMSVCLUIPackPkgEx;inetdb;rbDAD2329;ibmonitor;FireDACSqliteDriver;DbxClientDriver;soapmidas;rbDIDE2329;vclactnband;fmxFireDAC;dbexpress;rbWebTier2329;DBXMySQLDriver;TMSVCLUIPackPkg;VclSmp;inet;vcltouch;fmxase;dbrtl;fmxdae;dclRBDBE2329;FireDACMSAccDriver;CustomIPTransport;rbFireDAC2329;vcldsnap;DBXInterBaseDriver;rbCloudSC2329;IndySystem;rbServer2329;rbCIDE2329;TMSVCLUIPackPkgXls;rbADO2329;Skia.Package.VCL;vcldb;ibxbindings;rbRTL2329;vclFireDAC;bindcomp;FireDACCommon;IndyCore;RESTBackendComponents;rbClient2329;bindcompdbx;rtl;FireDACMySQLDriver;rbRCL2329;FireDACADSDriver;RESTComponents;DBXSqliteDriver;vcl;IndyIPServer;dsnapxml;dsnapcon;adortl;rbServiceCore2329;rbRIDE2329;dclRBADO2329;vclimg;rbIBE2329;FireDACPgDriver;FireDAC;inetdbxpress;xmlrtl;tethering;ibxpress;bindcompvcl;dsnap;rbRest2329;CloudService;rbDB2329;vclib;fmxobj;bindcompvclsmp;soaprtl;rbBDE2329;soapserver;FireDACIBDriver;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
@@ -102,10 +77,10 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
-        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
-        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+        <BRCC_IncludePath>D:\Repository\cartsys-crud\cartsys-crud\Controller;D:\Repository\cartsys-crud\cartsys-crud\DAO;D:\Repository\cartsys-crud\cartsys-crud\Model;D:\Repository\cartsys-crud\cartsys-crud\SQL;$(BRCC_IncludePath)</BRCC_IncludePath>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <Manifest_File>(None)</Manifest_File>
+        <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -113,38 +88,12 @@
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_DebugInformation>0</DCC_DebugInformation>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
-        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-    </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Controller\Cliente.Controller.pas"/>
-        <DCCReference Include="Controller\Relatorio.Controller.pas"/>
-        <DCCReference Include="Controller\Cidade.Controller.pas"/>
-        <DCCReference Include="Controller\Estado.Controller.pas"/>
-        <DCCReference Include="Model\Cidade.Model.pas"/>
-        <DCCReference Include="Model\Cliente.Model.pas"/>
-        <DCCReference Include="Model\Estado.Model.pas"/>
-        <DCCReference Include="View\Cliente.View.pas">
-            <Form>frmCliente</Form>
-        </DCCReference>
-        <DCCReference Include="View\Principal.View.pas">
-            <Form>frmPrincipal</Form>
-        </DCCReference>
-        <DCCReference Include="View\Relatorio.View.pas">
-            <Form>frmRelatorio</Form>
-        </DCCReference>
-        <DCCReference Include="DAO\Relatorio.DAO.pas"/>
-        <DCCReference Include="DAO\Cidade.DAO.pas"/>
-        <DCCReference Include="DAO\Cliente.DAO.pas"/>
-        <DCCReference Include="DAO\Conexao.DAO.pas"/>
-        <DCCReference Include="DAO\Estado.DAO.pas"/>
-        <None Include="Test\Project2.dpr"/>
+        <DCCReference Include="uTestBase.pas"/>
+        <DCCReference Include="Cidade.Controller.Test.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -163,19 +112,32 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">CartSys_CRUD.dpr</Source>
+                    <Source Name="MainSource">CartSys_tests.dpr</Source>
                 </Source>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="4">
-                <DeployFile LocalName="Test\Project2.dpr" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
+                <DeployFile LocalName="$(BDS)\Redist\iossimulator\libcgunwind.1.0.dylib" Class="DependencyModule">
+                    <Platform Name="iOSSimulator">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Win32\Debug\CartSys_CRUD.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="$(BDS)\Redist\iossimulator\libpcre.dylib" Class="DependencyModule">
+                    <Platform Name="iOSSimulator">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
+                    <Platform Name="OSX32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Win32\Debug\CartSys_tests.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>CartSys_CRUD.exe</RemoteName>
+                        <RemoteName>CartSys_tests.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -1132,7 +1094,7 @@
             </Deployment>
             <Platforms>
                 <Platform value="Win32">True</Platform>
-                <Platform value="Win64">True</Platform>
+                <Platform value="Win64">False</Platform>
             </Platforms>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

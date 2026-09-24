@@ -12,10 +12,13 @@ type
   TConexao = class
   private
     class var FConnection: TFDConnection;
+    class var FDatabasePath: String;
 
   public
     class function GetConnection: TFDConnection;
     class function GetNextID(ASequence: String): Integer;
+
+    class procedure SetDatabasePath(const mPath: String);
     class procedure Conectar;
     class procedure Desconectar;
   end;
@@ -32,8 +35,12 @@ begin
   try
     FConnection.Params.Clear;
     FConnection.Params.DriverID := 'FB';
+    if FDatabasePath = '' then
+      FDatabasePath :=
+        'D:\Repository\cartsys-crud\cartsys-crud\SQL\CartSysClientes.fdb';
+
     FConnection.Params.Add(
-      'Database=D:\Repository\cartsys-crud\cartsys-crud\SQL\CartSysClientes.fdb'
+      'Database=' + FDatabasePath
     );
 
     FConnection.Params.Add('User_Name=SYSDBA');
@@ -97,6 +104,14 @@ begin
   finally
     Qry.Free;
   end;
+end;
+
+class procedure TConexao.SetDatabasePath(const mPath: String);
+begin
+  FDatabasePath := mPath;
+
+  if Assigned(FConnection) then
+    Desconectar;
 end;
 
 initialization

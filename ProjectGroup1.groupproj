@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{66EDC28D-FC5B-4AB0-9F83-5041FD33129B}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="CartSys_CRUD.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Test\CartSys_tests.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="CartSys_CRUD">
+        <MSBuild Projects="CartSys_CRUD.dproj"/>
+    </Target>
+    <Target Name="CartSys_CRUD:Clean">
+        <MSBuild Projects="CartSys_CRUD.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="CartSys_CRUD:Make">
+        <MSBuild Projects="CartSys_CRUD.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="CartSys_tests">
+        <MSBuild Projects="Test\CartSys_tests.dproj"/>
+    </Target>
+    <Target Name="CartSys_tests:Clean">
+        <MSBuild Projects="Test\CartSys_tests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="CartSys_tests:Make">
+        <MSBuild Projects="Test\CartSys_tests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="CartSys_CRUD;CartSys_tests"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="CartSys_CRUD:Clean;CartSys_tests:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="CartSys_CRUD:Make;CartSys_tests:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
