@@ -10,20 +10,12 @@ uses
   Cliente.DAO;
 
 type
-  TEnderecoDTO = record
-    CEP: String;
-    Logradouro: String;
-    Bairro: String;
-    Cidade: String;
-    UF: String;
-  end;
-
-type
   TClienteController = class
   public
     function BuscarCEP(const mCEP: String; out mEndereco: TEnderecoDTO): Boolean;
     function ClienteExiste(mCPFCNPJ: String): Boolean;
     function ListarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente): TFDQuery;
+    function ContarClientes: Integer;
 
     function ApenasNumeros(const mTexto: String): String;
 
@@ -164,11 +156,11 @@ end;
 
 function TClienteController.ValidarCPF(const mCPF: String): Boolean;
 var
-  Soma: Integer;
-  Resto: Integer;
+  mSoma: Integer;
+  mResto: Integer;
   I: Integer;
-  Dig1: Integer;
-  Dig2: Integer;
+  mDig1: Integer;
+  mDig2: Integer;
 begin
   Result := False;
 
@@ -178,75 +170,87 @@ begin
   if mCPF = StringOfChar(mCPF[1], 11) then
     Exit;
 
-  Soma := 0;
+  mSoma := 0;
 
   for I := 1 to 9 do
-    Soma := Soma +
+    mSoma := mSoma +
       StrToInt(mCPF[I]) * (11 - I);
 
-  Resto := (Soma * 10) mod 11;
+  mResto := (mSoma * 10) mod 11;
 
-  if Resto = 10 then
-    Resto := 0;
+  if mResto = 10 then
+    mResto := 0;
 
-  Dig1 := Resto;
+  mDig1 := mResto;
 
-  Soma := 0;
+  mSoma := 0;
 
   for I := 1 to 10 do
-    Soma := Soma +
+    mSoma := mSoma +
       StrToInt(mCPF[I]) * (12 - I);
 
-  Resto := (Soma * 10) mod 11;
+  mResto := (mSoma * 10) mod 11;
 
-  if Resto = 10 then
-    Resto := 0;
+  if mResto = 10 then
+    mResto := 0;
 
-  Dig2 := Resto;
+  mDig2 := mResto;
 
   Result :=
-    (Dig1 = StrToInt(mCPF[10])) and
-    (Dig2 = StrToInt(mCPF[11]));
+    (mDig1 = StrToInt(mCPF[10])) and
+    (mDig2 = StrToInt(mCPF[11]));
 end;
 
 function TClienteController.ValidarCPFCNPJ(const mDocumento: String): Boolean;
 var
-  Doc: String;
+  mDoc: String;
 begin
-  Doc := ApenasNumeros(mDocumento);
+  mDoc := ApenasNumeros(mDocumento);
 
-  if Length(Doc) = 11 then
-    Result := ValidarCPF(Doc)
-  else if Length(Doc) = 14 then
-    Result := ValidarCNPJAPI(Doc)
+  if Length(mDoc) = 11 then
+    Result := ValidarCPF(mDoc)
+  else if Length(mDoc) = 14 then
+    Result := ValidarCNPJAPI(mDoc)
   else
     Result := False;
 end;
 
 function TClienteController.ClienteExiste(mCPFCNPJ: String): Boolean;
 var
-  DAO: TClienteDAO;
+  mClienteDAO: TClienteDAO;
 begin
-  DAO := TClienteDAO.Create;
+  mClienteDAO := TClienteDAO.Create;
   try
-    Result := DAO.ClienteExiste(ApenasNumeros(mCPFCNPJ));
+    Result := mClienteDAO.ClienteExiste(ApenasNumeros(mCPFCNPJ));
   finally
-    DAO.Free;
+    mClienteDAO.Free;
+  end;
+end;
+
+function TClienteController.ContarClientes: Integer;
+var
+  mClienteDAO: TClienteDAO;
+begin
+  mClienteDAO := TClienteDAO.Create;
+  try
+    Result := mClienteDAO.ContarClientes;
+  finally
+    mClienteDAO.Free;
   end;
 end;
 
 function TClienteController.ListarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente): TFDQuery;
 var
-  DAO: TClienteDAO;
+  mClienteDAO: TClienteDAO;
 begin
-  DAO := TClienteDAO.Create;
+  mClienteDAO := TClienteDAO.Create;
   try
-    DAO.ListarClientes(
+    mClienteDAO.ListarClientes(
       mQuery,
       mFiltro
     );
   finally
-    DAO.Free;
+    mClienteDAO.Free;
   end;
 end;
 

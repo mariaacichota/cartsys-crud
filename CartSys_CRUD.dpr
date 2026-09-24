@@ -4,6 +4,8 @@ uses
   Vcl.Forms,
   Cliente.Controller in 'Controller\Cliente.Controller.pas',
   Relatorio.Controller in 'Controller\Relatorio.Controller.pas',
+  Cidade.Controller in 'Controller\Cidade.Controller.pas',
+  Estado.Controller in 'Controller\Estado.Controller.pas',
   Cidade.Model in 'Model\Cidade.Model.pas',
   Cliente.Model in 'Model\Cliente.Model.pas',
   Estado.Model in 'Model\Estado.Model.pas',

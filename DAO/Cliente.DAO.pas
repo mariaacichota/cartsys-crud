@@ -7,6 +7,16 @@ uses
   FireDAC.Comp.Client,
   Cliente.Model, Conexao.DAO;
 
+
+type
+  TEnderecoDTO = record
+    CEP: String;
+    Logradouro: String;
+    Bairro: String;
+    Cidade: String;
+    UF: String;
+  end;
+
 type
   TFiltroCliente = record
     ID: Integer;

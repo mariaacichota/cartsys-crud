@@ -8,7 +8,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Menus,
   Vcl.Imaging.pngimage, Vcl.StdCtrls,
   FireDAC.Phys.FBDef, FireDAC.Stan.Intf, FireDAC.Phys, FireDAC.Phys.IBBase, FireDAC.Phys.FB,
-  Cliente.View, Relatorio.View, Cliente.DAO, Estado.DAO, Cidade.DAO;
+  Cliente.View, Relatorio.View, Cliente.Controller, Estado.Controller, Cidade.Controller;
 
 type
   TfrmPrincipal = class(TForm)
@@ -37,6 +37,12 @@ type
     procedure subRelatorioClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+
+  private
+    FCidadeController: TCidadeController;
+    FClienteController: TClienteController;
+    FEstadoController: TEstadoController;
   end;
 
 var
@@ -47,6 +53,13 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure TfrmPrincipal.FormDestroy(Sender: TObject);
+begin
+  FCidadeController.Free;
+  FClienteController.Free;
+  FEstadoController.Free;
+end;
 
 procedure TfrmPrincipal.FormResize(Sender: TObject);
 var
@@ -79,23 +92,10 @@ begin
 end;
 
 procedure TfrmPrincipal.FormShow(Sender: TObject);
-var
-  ClienteDAO: TClienteDAO;
-  CidadeDAO:  TCidadeDAO;
-  EstadoDAO:  TEstadoDAO;
 begin
-  ClienteDAO := TClienteDAO.Create;
-  CidadeDAO  := TCidadeDAO.Create;
-  EstadoDAO  := TEstadoDAO.Create;
-  try
-    lblClientesValor.Caption := IntToStr(ClienteDAO.ContarClientes);
-    lblCidadesValor.Caption  := IntToStr(CidadeDAO.ContarCidades);
-    lblEstadosValor.Caption  := IntToStr(EstadoDAO.ContarEstados);
-  finally
-    ClienteDAO.Free;
-    CidadeDAO.Free;
-    EstadoDAO.Free;
-  end;
+  lblClientesValor.Caption := IntToStr(FClienteController.ContarClientes);
+  lblCidadesValor.Caption  := IntToStr(FCidadeController.ContarCidades);
+  lblEstadosValor.Caption  := IntToStr(FEstadoController.ContarEstados);
 end;
 
 procedure TfrmPrincipal.subClienteClick(Sender: TObject);

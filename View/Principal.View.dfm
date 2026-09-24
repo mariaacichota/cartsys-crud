@@ -12,6 +12,7 @@ object frmPrincipal: TfrmPrincipal
   Font.Style = []
   Menu = mnPrincipal
   WindowState = wsMaximized
+  OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
   TextHeight = 15
