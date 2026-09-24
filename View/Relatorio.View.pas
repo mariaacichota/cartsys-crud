@@ -13,7 +13,7 @@ uses
   ppCtrls, ppPrnabl, ppBands, ppCache, ppDesignLayer, ppParameter,
   AdvGlassButton, AdvGlowButton, CurvyControls, AdvSmoothButton, Vcl.Imaging.pngimage,
   AdvSmoothPanel, ppViewr,
-  Conexao.DAO, Relatorio.DAO, Relatorio.Controller;
+  Conexao.DAO, Relatorio.DAO, Relatorio.Controller, Estado.Controller, Cidade.Controller;
 
 type
   TfrmRelatorio = class(TForm)
@@ -70,6 +70,8 @@ type
 
   private
     FRelatorioController: TRelatorioController;
+    FEstadoController: TEstadoController;
+    FCidadeController: TCidadeController;
 
     procedure CarregarRelatorio;
     function ItensMarcados(mCheck: TCheckListBox): String;
@@ -119,7 +121,7 @@ end;
 
 procedure TfrmRelatorio.ckcbUFClickCheck(Sender: TObject);
 begin
-  FRelatorioController.CarregarCidadesPorUFs(
+  FCidadeController.CarregarCidadesPorUFs(
     ckcbUF,
     ckcbCidade.Items
   );
@@ -128,12 +130,14 @@ end;
 procedure TfrmRelatorio.FormCreate(Sender: TObject);
 begin
   FRelatorioController := TRelatorioController.Create;
+  FCidadeController := TCidadeController.Create;
+  FEstadoController := TEstadoController.Create;
 
   qryRelatorioClientes.Connection := TConexao.GetConnection;
 
   viewRelatorioClientes.Report := ppRelatorioClientes;
 
-  FRelatorioController.CarregarUFs(ckcbUF.Items);
+  FEstadoController.CarregarUFs(ckcbUF.Items);
 
   rdgFiltrosRelatorio.ItemIndex := 0;
   rdgFiltrosRelatorioClick(nil);
@@ -142,6 +146,8 @@ end;
 procedure TfrmRelatorio.FormDestroy(Sender: TObject);
 begin
   FRelatorioController.Free;
+  FCidadeController.Free;
+  FEstadoController.Free;
 end;
 
 procedure TfrmRelatorio.FormKeyDown(Sender: TObject; var Key: Word;

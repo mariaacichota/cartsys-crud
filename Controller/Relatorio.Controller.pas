@@ -9,9 +9,6 @@ uses
 type
   TRelatorioController = class
   public
-    procedure CarregarUFs(mLista: TStrings);
-    procedure CarregarCidades(mUF: String; mLista: TStrings);
-    procedure CarregarCidadesPorUFs(mUFs: TCheckListBox; mCidades: TStrings);
     procedure ValidarFiltros(mTipoFiltro: TTipoFiltroRelatorio;
                              mIdInicial, mIdFinal, mCidades, mUFs: String);
 
@@ -20,71 +17,6 @@ type
   end;
 
 implementation
-
-procedure TRelatorioController.CarregarCidades(mUF: String; mLista: TStrings);
-var
-  mCidadeDAO: TCidadeDAO;
-  mQry: TFDQuery;
-begin
-  mCidadeDAO := TCidadeDAO.Create;
-  try
-    mQry := mCidadeDAO.ListarPorEstado(mUF);
-    try
-      while not mQry.Eof do
-      begin
-        if mLista.IndexOf(mQry.FieldByName('NOME').AsString) = -1 then
-          mLista.Add(mQry.FieldByName('NOME').AsString);
-
-        mQry.Next;
-      end;
-    finally
-      mQry.Free;
-    end;
-  finally
-    mCidadeDAO.Free;
-  end;
-end;
-
-procedure TRelatorioController.CarregarCidadesPorUFs(mUFs: TCheckListBox; mCidades: TStrings);
-var
-  I: Integer;
-begin
-  mCidades.Clear;
-
-  for I := 0 to mUFs.Count - 1 do
-  begin
-    if mUFs.Checked[I] then
-      CarregarCidades(
-        mUFs.Items[I],
-        mCidades
-      );
-  end;
-end;
-
-procedure TRelatorioController.CarregarUFs(mLista: TStrings);
-var
-  mRelatorioDAO: TEstadoDAO;
-  mQry: TFDQuery;
-begin
-  mLista.Clear;
-
-  mRelatorioDAO := TEstadoDAO.Create;
-  try
-    mQry := mRelatorioDAO.ListarEstados;
-    try
-      while not mQry.Eof do
-      begin
-        mLista.Add(mQry.FieldByName('UF').AsString);
-        mQry.Next;
-      end;
-
-    finally
-      mQry.Free;
-    end;
-  finally
-    mRelatorioDAO.Free;
-  end;
-end;
 
 function TRelatorioController.GerarSQLRelatorio(mTipoFiltro: TTipoFiltroRelatorio;
   mIdInicial, mIdFinal: Integer; mCidades, mUFs: String): String;

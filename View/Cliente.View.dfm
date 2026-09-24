@@ -13,6 +13,7 @@ object frmCliente: TfrmCliente
   Font.Style = []
   KeyPreview = True
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   TextHeight = 15
   object pgcGeral: TPageControl
@@ -24,7 +25,7 @@ object frmCliente: TfrmCliente
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 0
-    ExplicitWidth = 1000
+    ExplicitWidth = 1219
     ExplicitHeight = 565
     object tabConsulta: TTabSheet
       Caption = 'Consulta'
@@ -37,7 +38,6 @@ object frmCliente: TfrmCliente
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 994
         object lblNameConsulta: TLabel
           Left = 18
           Top = 42
@@ -166,10 +166,11 @@ object frmCliente: TfrmCliente
           Font.Height = -14
           Font.Name = 'Segoe UI'
           Font.Style = []
-          MaxLength = 18
+          MaxLength = 14
           ParentFont = False
           TabOrder = 3
-          OnChange = edtCPFCNPJConsultaChange
+          OnExit = edtCPFCNPJConsultaExit
+          OnKeyPress = edtCPFCNPJConsultaKeyPress
         end
         object btnPesquisarConsulta: TAdvSmoothButton
           Left = 481
@@ -264,9 +265,12 @@ object frmCliente: TfrmCliente
           Font.Height = -14
           Font.Name = 'Segoe UI'
           Font.Style = []
+          MaxLength = 8
           ParentFont = False
           TabOrder = 4
           OnChange = edtCEPConsultaChange
+          OnExit = edtCEPConsultaExit
+          OnKeyPress = edtCEPConsultaKeyPress
         end
         object cbCidadeConsulta: TComboBox
           Left = 309
@@ -319,7 +323,6 @@ object frmCliente: TfrmCliente
         Height = 309
         Align = alClient
         TabOrder = 1
-        ExplicitWidth = 994
         object gridDadosConsulta: TDBAdvGrid
           Left = 1
           Top = 1
@@ -1019,7 +1022,6 @@ object frmCliente: TfrmCliente
         Color = clWhite
         ParentBackground = False
         TabOrder = 2
-        ExplicitWidth = 994
         object btnNovoClienteConsulta: TAdvSmoothButton
           Left = 16
           Top = 29
@@ -1104,7 +1106,7 @@ object frmCliente: TfrmCliente
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 992
+        ExplicitWidth = 1211
         object lblIDTituloCadastro: TLabel
           Left = 14
           Top = 37
@@ -1188,7 +1190,7 @@ object frmCliente: TfrmCliente
         Height = 389
         Align = alClient
         TabOrder = 1
-        ExplicitWidth = 992
+        ExplicitWidth = 1211
         ExplicitHeight = 381
         object pnlDadosPessoaisCadastro: TAdvSmoothPanel
           Left = 1
@@ -1223,7 +1225,7 @@ object frmCliente: TfrmCliente
           Version = '1.7.1.9'
           Align = alTop
           TabOrder = 0
-          ExplicitWidth = 990
+          ExplicitWidth = 1209
           TMSStyle = 0
           object lblCPFCNPJCadastro: TLabel
             Left = 192
@@ -1274,22 +1276,23 @@ object frmCliente: TfrmCliente
             Left = 192
             Top = 110
             Width = 150
-            Height = 27
+            Height = 33
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -19
             Font.Name = 'Segoe UI'
             Font.Style = []
-            MaxLength = 18
+            MaxLength = 14
             ParentFont = False
             TabOrder = 2
-            OnChange = edtCPFCNPJCadastroChange
+            OnExit = edtCPFCNPJCadastroExit
+            OnKeyPress = edtCPFCNPJCadastroKeyPress
           end
           object edtDataNascimentoCadastro: TDateTimePicker
             Left = 16
             Top = 110
             Width = 155
-            Height = 27
+            Height = 28
             Date = 46151.000000000000000000
             Time = 0.144554016202164300
             Font.Charset = DEFAULT_CHARSET
@@ -1304,7 +1307,7 @@ object frmCliente: TfrmCliente
             Left = 16
             Top = 50
             Width = 414
-            Height = 27
+            Height = 33
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -19
@@ -1347,7 +1350,7 @@ object frmCliente: TfrmCliente
           Version = '1.7.1.9'
           Align = alClient
           TabOrder = 1
-          ExplicitWidth = 990
+          ExplicitWidth = 1209
           ExplicitHeight = 219
           TMSStyle = 0
           object lblBairroCadastro: TLabel
@@ -1502,7 +1505,7 @@ object frmCliente: TfrmCliente
             Left = 18
             Top = 179
             Width = 217
-            Height = 27
+            Height = 33
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -19
@@ -1515,22 +1518,24 @@ object frmCliente: TfrmCliente
             Left = 16
             Top = 120
             Width = 150
-            Height = 27
+            Height = 33
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -19
             Font.Name = 'Segoe UI'
             Font.Style = []
-            MaxLength = 9
+            MaxLength = 8
             ParentFont = False
             TabOrder = 2
             OnChange = edtCEPCadastroChange
+            OnExit = edtCEPCadastroExit
+            OnKeyPress = edtCEPCadastroKeyPress
           end
           object edtEnderecoCadastro: TEdit
             Left = 16
             Top = 66
             Width = 414
-            Height = 27
+            Height = 33
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -19
@@ -1543,7 +1548,7 @@ object frmCliente: TfrmCliente
             Left = 445
             Top = 66
             Width = 81
-            Height = 27
+            Height = 33
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -19
@@ -1557,7 +1562,7 @@ object frmCliente: TfrmCliente
             Left = 248
             Top = 179
             Width = 337
-            Height = 27
+            Height = 33
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -19
@@ -1578,7 +1583,7 @@ object frmCliente: TfrmCliente
         ParentBackground = False
         TabOrder = 2
         ExplicitTop = 454
-        ExplicitWidth = 992
+        ExplicitWidth = 1211
         object btnNovoCadastro: TAdvSmoothButton
           Left = 14
           Top = 18

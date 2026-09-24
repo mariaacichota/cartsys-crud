@@ -12,7 +12,7 @@ uses
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
   FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
   FireDAC.Comp.Client,
-  Cliente.Controller, Cliente.DAO, Cidade.DAO, Estado.DAO, Cliente.Model;
+  Conexao.DAO, Cliente.DAO, Cliente.Model, Cliente.Controller, Cidade.Controller, Estado.Controller;
 
 type
   TfrmCliente = class(TForm)
@@ -78,6 +78,7 @@ type
     dsConsulta: TDataSource;
     edtComplementoCadastro: TEdit;
     lblComplementoCadastro: TLabel;
+
     procedure btnPesquisarConsultaClick(Sender: TObject);
     procedure btnLimparConsultaClick(Sender: TObject);
     procedure btnNovoClienteConsultaClick(Sender: TObject);
@@ -93,88 +94,39 @@ type
     procedure btnExcluirCadastroClick(Sender: TObject);
     procedure edtNumeroCadastroChange(Sender: TObject);
     procedure edtCEPCadastroChange(Sender: TObject);
-    procedure edtCPFCNPJConsultaChange(Sender: TObject);
-    procedure edtCPFCNPJCadastroChange(Sender: TObject);
     procedure edtCEPConsultaChange(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure edtCEPConsultaExit(Sender: TObject);
+    procedure edtCPFCNPJConsultaKeyPress(Sender: TObject; var Key: Char);
+    procedure edtCEPConsultaKeyPress(Sender: TObject; var Key: Char);
+    procedure edtCEPCadastroKeyPress(Sender: TObject; var Key: Char);
+    procedure edtCPFCNPJCadastroKeyPress(Sender: TObject; var Key: Char);
+    procedure edtCEPCadastroExit(Sender: TObject);
+    procedure edtCPFCNPJCadastroExit(Sender: TObject);
+    procedure edtCPFCNPJConsultaExit(Sender: TObject);
   private
     FIdCliente: Integer;
     FUltimoCEPConsultadoConsulta: String;
     FUltimoCEPConsultadoCadastro: String;
 
-    procedure CarregarCidades(mUF: String; mCombo: TComboBox);
-    procedure CarregarUFs(mCombo: TComboBox);
+    FClienteController: TClienteController;
+    FEstadoController: TEstadoController;
+    FCidadeController: TCidadeController;
+
     procedure LimparCamposConsulta;
     procedure LimparCamposCadastro;
     procedure PopularGrid;
     procedure EditarClienteSelecionado;
-    procedure VerificaESalvaCidade(mCliente: TCliente);
-    procedure AplicarMascaraCPFCNPJ(mCampo: TEdit);
-    procedure AplicarMascaraCEP(mCampo: TEdit; mTexto: String);
     procedure PreencherEnderecoViaCEP(mCEP: TEdit; mCidade: TComboBox; mUF: TComboBox;
-                                      mUltimoCEP: String; mEndereco: TEdit = nil; mBairro: TEdit = nil);
+                                      var mUltimoCEP: String; mEndereco: TEdit = nil; mBairro: TEdit = nil);
 
-    function ValidarCamposCadastro: Boolean;
-    function ValidarExclusao: Boolean;
     function MontarCliente: TCliente;
     function LocalizarItemCombo(mCombo: TComboBox; const mTexto: String): Integer;
-  public
-    { Public declarations }
   end;
-
-var
-  frmCliente: TfrmCliente;
 
 implementation
 
-uses
-  Conexao.DAO;
-
 {$R *.dfm}
-
-procedure TfrmCliente.AplicarMascaraCEP(mCampo: TEdit; mTexto: String);
-begin
-  var OldOnChange := mCampo.OnChange;
-  mCampo.OnChange := nil;
-  try
-    mCampo.Text :=
-      FormatMaskText(
-        '00000\-000;0',
-        mTexto
-      );
-
-    mCampo.SelStart := Length(mCampo.Text);
-  finally
-    mCampo.OnChange := OldOnChange;
-  end;
-end;
-
-procedure TfrmCliente.AplicarMascaraCPFCNPJ(mCampo: TEdit);
-var
-  Texto: String;
-  Controller: TClienteController;
-begin
-
-  Controller := TClienteController.Create;
-  try
-    Texto := Controller.ApenasNumeros(mCampo.Text);
-
-    var OldOnChange := mCampo.OnChange;
-    mCampo.OnChange := nil;
-    try
-      if Length(Texto) <= 11 then
-        mCampo.Text := FormatMaskText('000\.000\.000\-00;0', Texto)
-      else
-        mCampo.Text := FormatMaskText('00\.000\.000\/0000\-00;0', Texto);
-
-      mCampo.SelStart := Length(mCampo.Text);
-
-    finally
-      mCampo.OnChange := OldOnChange;
-    end;
-  finally
-    Controller.Free;
-  end;
-end;
 
 procedure TfrmCliente.btnCancelarCadastroClick(Sender: TObject);
 begin
@@ -187,6 +139,7 @@ begin
     Exit;
 
   LimparCamposCadastro;
+  PopularGrid;
   pgcGeral.ActivePage := tabConsulta;
 end;
 
@@ -196,12 +149,7 @@ begin
 end;
 
 procedure TfrmCliente.btnExcluirCadastroClick(Sender: TObject);
-var
-  DAO: TClienteDAO;
 begin
-  if not ValidarExclusao then
-    Exit;
-
   if MessageDlg(
        Format(
          'Deseja realmente excluir o cliente "%s"?',
@@ -210,12 +158,11 @@ begin
        mtConfirmation,
        [mbYes, mbNo],
        0
-     ) <> mrYes then
+     ) = mrNo then
     Exit;
 
-  DAO := TClienteDAO.Create;
   try
-    DAO.Excluir(FIdCliente);
+    FClienteController.ExcluirCliente(FIdCliente);
 
     MessageDlg(
       'Cliente excluído com sucesso.',
@@ -224,14 +171,21 @@ begin
       0
     );
 
+    lblStatusValorCadastro.Caption :=
+      'cadastro de cliente excluído com sucesso!';
 
-    lblStatusValorCadastro.Caption := 'cadastro de cliente excluído com sucesso!';
     LimparCamposCadastro;
     PopularGrid;
     pgcGeral.ActivePage := tabConsulta;
 
-  finally
-    DAO.Free;
+  except
+    on E: Exception do
+      MessageDlg(
+        E.Message,
+        mtWarning,
+        [mbOK],
+        0
+      );
   end;
 end;
 
@@ -286,53 +240,89 @@ end;
 
 procedure TfrmCliente.btnSalvarCadastroClick(Sender: TObject);
 var
-  Cliente: TCliente;
+  mCliente: TCliente;
   DAO: TClienteDAO;
 begin
-  if not ValidarCamposCadastro then
-    Exit;
 
-  Cliente := MontarCliente;
-  DAO := TClienteDAO.Create;
-  try
-    VerificaESalvaCidade(Cliente);
+  if (cbUFCadastro.ItemIndex = -1) and (Trim(cbUFCadastro.Text).IsEmpty) then
+    begin
+      MessageDlg(
+        'Selecione a UF.',
+        mtWarning,
+        [mbOK],
+        0);
 
-    if Cliente.ID = 0 then
-    begin
-      Cliente.ID := TConexao.GetNextID('GEN_CLIENTE_ID');
-      DAO.Inserir(Cliente);
-      ShowMessage('Cliente cadastrado com sucesso.');
-    end
-    else
-    begin
-      DAO.Alterar(Cliente);
-      ShowMessage('Cliente alterado com sucesso.');
+      cbUFCadastro.SetFocus;
+      Exit;
     end;
 
-    lblStatusValorCadastro.Caption := 'cadastro de cliente salvo com sucesso!';
-    LimparCamposCadastro;
-    PopularGrid;
+  if (not ckSemNumeroCadastro.Checked) and
+     (Trim(edtNumeroCadastro.Text) = '') then
+    begin
+      MessageDlg(
+        'Informe o número do endereço.',
+        mtWarning,
+        [mbOK],
+        0);
 
+      edtNumeroCadastro.SetFocus;
+      Exit;
+    end;
+
+  mCliente := TCliente.Create;
+  try
+    mCliente := MontarCliente;
+    mCliente.Cidade := FCidadeController.BuscarCidade(cbCidadeConsulta.Text, cbUFCadastro.Text);
+    FClienteController.SalvarCliente(mCliente);
+    MessageDlg(
+      'Cadastro salvo com sucesso.',
+      mtInformation,
+      [mbOK],
+      0);
+
+    LimparCamposCadastro;
     pgcGeral.ActivePage := tabConsulta;
-  finally
-    Cliente.Free;
-    DAO.Free;
+    PopularGrid;
+    mCliente.Free;
+  except
+    on E: Exception do
+      begin
+        mCliente.Free;
+
+        MessageDlg(
+          E.Message,
+          mtWarning,
+          [mbOK],
+          0
+        );
+      end;
   end;
 end;
 
 procedure TfrmCliente.FormCreate(Sender: TObject);
 begin
+  FClienteController := TClienteController.Create;
+  FCidadeController := TCidadeController.Create;
+  FEstadoController := TEstadoController.Create;
+
   tabConsulta.TabVisible := False;
   tabCadastro.TabVisible := False;
   pgcGeral.ActivePage := tabConsulta;
 
   LimparCamposConsulta;
 
-  CarregarUFs(cbUFConsulta);
-  CarregarUFs(cbUFCadastro);
+  FEstadoController.CarregarUFs(cbUFConsulta.Items);
+  FEstadoController.CarregarUFs(cbUFCadastro.Items);
 
   qryConsulta.Connection := TConexao.GetConnection;
   PopularGrid;
+end;
+
+procedure TfrmCliente.FormDestroy(Sender: TObject);
+begin
+  FClienteController.Free;
+  FEstadoController.Free;
+  FCidadeController.Free;
 end;
 
 procedure TfrmCliente.FormKeyDown(Sender: TObject; var Key: Word;
@@ -414,21 +404,12 @@ begin
 end;
 
 function TfrmCliente.MontarCliente: TCliente;
-var
-  Controller: TClienteController;
 begin
   Result := TCliente.Create;
   Result.ID := FIdCliente;
   Result.Nome := edtNomeCadastro.Text;
-
-  Controller := TClienteController.Create;
-  try
-    Result.CEP     := Controller.ApenasNumeros(edtCEPCadastro.Text);
-    Result.CPFCNPJ := Controller.ApenasNumeros(edtCPFCNPJCadastro.Text);
-  finally
-    Controller.Free;
-  end;
-
+  Result.CEP     := FClienteController.ApenasNumeros(edtCEPCadastro.Text);
+  Result.CPFCNPJ := FClienteController.ApenasNumeros(edtCPFCNPJCadastro.Text);
   Result.Endereco := edtEnderecoCadastro.Text;
   Result.Numero := edtNumeroCadastro.Text;
   Result.Complemento := edtComplementoCadastro.Text;
@@ -446,161 +427,86 @@ end;
 
 procedure TfrmCliente.PopularGrid;
 var
-  Controller: TClienteController;
-  Filtro: TFiltroCliente;
+  mFiltro: TFiltroCliente;
 begin
-  Controller := TClienteController.Create;
-  try
-    Filtro.ID := StrToIntDef(edtIDConsulta.Text, 0);
-    Filtro.Nome := Trim(edtNomeConsulta.Text);
-    Filtro.CPFCNPJ := Controller.ApenasNumeros(edtCPFCNPJConsulta.Text);
-    Filtro.CEP := Controller.ApenasNumeros(edtCEPConsulta.Text);
+  mFiltro.ID := StrToIntDef(edtIDConsulta.Text, 0);
+  mFiltro.Nome := Trim(edtNomeConsulta.Text);
+  mFiltro.CPFCNPJ := FClienteController.ApenasNumeros(edtCPFCNPJConsulta.Text);
+  mFiltro.CEP := FClienteController.ApenasNumeros(edtCEPConsulta.Text);
 
-    if edtDataNascimentoConsulta.Checked then
-      Filtro.DataNascimento := edtDataNascimentoConsulta.Date
-    else
-      Filtro.DataNascimento := 0;
+  if edtDataNascimentoConsulta.Checked then
+    mFiltro.DataNascimento := edtDataNascimentoConsulta.Date
+  else
+    mFiltro.DataNascimento := 0;
 
-    if cbUFConsulta.ItemIndex >= 0 then
-      Filtro.UF := cbUFConsulta.Text
-    else
-      Filtro.UF := '';
+  if cbUFConsulta.ItemIndex >= 0 then
+    mFiltro.UF := cbUFConsulta.Text
+  else
+    mFiltro.UF := '';
 
-    if cbCidadeConsulta.ItemIndex >= 0 then
-      Filtro.Cidade := cbCidadeConsulta.Text
-    else
-      Filtro.Cidade := '';
+  if cbCidadeConsulta.ItemIndex >= 0 then
+    mFiltro.Cidade := cbCidadeConsulta.Text
+  else
+    mFiltro.Cidade := '';
 
-    qryConsulta.Close;
+  qryConsulta.Close;
 
-    Controller.ListarClientes(qryConsulta, Filtro);
+  FClienteController.BuscarClientes(qryConsulta, mFiltro);
 
-    if qryConsulta.IsEmpty then
-      btnEditarSelecionadoConsulta.Enabled := False
-    else
-      btnEditarSelecionadoConsulta.Enabled := True;
-  finally
-    Controller.Free;
-  end;
+  if qryConsulta.IsEmpty then
+    btnEditarSelecionadoConsulta.Enabled := False
+  else
+    btnEditarSelecionadoConsulta.Enabled := True;
 end;
 
 procedure TfrmCliente.PreencherEnderecoViaCEP(mCEP: TEdit; mCidade,
-  mUF: TComboBox; mUltimoCEP: String; mEndereco: TEdit = nil; mBairro: TEdit = nil);
+  mUF: TComboBox; var mUltimoCEP: String; mEndereco: TEdit = nil; mBairro: TEdit = nil);
 var
   mTexto: String;
-  Controller: TClienteController;
   Endereco: TEnderecoDTO;
   mIndexUF: Integer;
   mIndexCidade: Integer;
 begin
-  Controller := TClienteController.Create;
-  try
-    mTexto := Controller.ApenasNumeros(mCEP.Text);
-    AplicarMascaraCEP(mCEP, mTexto);
+  mTexto := FClienteController.ApenasNumeros(mCEP.Text);
 
-    if Length(mTexto) <> 8 then
-      Exit;
+  if Length(mTexto) <> 8 then
+    Exit;
 
-    if mTexto = mUltimoCEP then
-      Exit;
+  if mTexto = mUltimoCEP then
+    Exit;
 
-    if not Controller.BuscarCEP(mCEP.Text, Endereco) then
-      Exit;
+  if not FClienteController.BuscarCEP(mCEP.Text, Endereco) then
+    Exit;
 
-    mUltimoCEP := mTexto;
+  mUltimoCEP := mTexto;
 
-    if Assigned(mEndereco) then
-      mEndereco.Text := Endereco.Logradouro;
+  if Assigned(mEndereco) then
+    mEndereco.Text := Endereco.Logradouro;
 
-    if Assigned(mBairro) then
-      mBairro.Text := Endereco.Bairro;
+  if Assigned(mBairro) then
+    mBairro.Text := Endereco.Bairro;
 
-    mIndexUF := LocalizarItemCombo(mUF, Endereco.UF);
+  mIndexUF := LocalizarItemCombo(mUF, Endereco.UF);
+  if mIndexUF >= 0 then
+    mUF.ItemIndex := mIndexUF;
 
-    if mIndexUF >= 0 then
-    begin
-      mUF.ItemIndex := mIndexUF;
-      CarregarCidades(Endereco.UF, mCidade);
-    end;
-
-    mIndexCidade := LocalizarItemCombo(mCidade, Endereco.Cidade);
-    if mIndexCidade >= 0 then
-      mCidade.ItemIndex := mIndexCidade
-    else
-      mCidade.Text := Endereco.Cidade;
-  finally
-    Controller.Free;
-  end;
+  mIndexCidade := LocalizarItemCombo(mCidade, Endereco.Cidade);
+  if mIndexCidade >= 0 then
+    mCidade.ItemIndex := mIndexCidade
+  else
+    mCidade.Text := Endereco.Cidade;
 end;
-procedure TfrmCliente.CarregarCidades(mUF: String; mCombo: TComboBox);
-var
-  DAO: TCidadeDAO;
-  Qry: TFDQuery;
-begin
-  DAO := TCidadeDAO.Create;
-  try
-    Qry := DAO.ListarPorEstado(mUF);
-    try
-      mCombo.Items.Clear;
-
-      while not Qry.Eof do
-        begin
-          mCombo.Items.AddObject(
-            Qry.FieldByName('NOME').AsString,
-            TObject(Qry.FieldByName('ID').AsInteger));
-
-          Qry.Next;
-        end;
-
-    finally
-      Qry.Free;
-    end;
-
-  finally
-    DAO.Free;
-  end;
-end;
-
-procedure TfrmCliente.CarregarUFs(mCombo: TComboBox);
-var
-  DAO: TEstadoDAO;
-  Qry: TFDQuery;
-begin
-  DAO := TEstadoDAO.Create;
-  try
-    Qry := DAO.ListarEstados;
-    try
-      mCombo.Items.Clear;
-
-      while not Qry.Eof do
-      begin
-        mCombo.Items.Add(
-          Qry.FieldByName('UF').AsString
-        );
-
-        Qry.Next;
-      end;
-
-    finally
-      Qry.Free;
-    end;
-
-  finally
-    DAO.Free;
-  end;
-end;
-
 
 procedure TfrmCliente.cbUFCadastroChange(Sender: TObject);
 begin
   if cbUFCadastro.ItemIndex >= 0 then
-    CarregarCidades(cbUFCadastro.Items[cbUFCadastro.ItemIndex], cbCidadeCadastro);
+    FCidadeController.CarregarCidades(cbUFCadastro.Items[cbUFCadastro.ItemIndex], cbCidadeCadastro.Items);
 end;
 
 procedure TfrmCliente.cbUFConsultaChange(Sender: TObject);
 begin
   if cbUFConsulta.ItemIndex >= 0 then
-    CarregarCidades(cbUFConsulta.Items[cbUFConsulta.ItemIndex], cbCidadeConsulta);
+    FCidadeController.CarregarCidades(cbUFConsulta.Items[cbUFConsulta.ItemIndex], cbCidadeConsulta.Items);
 end;
 
 procedure TfrmCliente.EditarClienteSelecionado;
@@ -648,7 +554,7 @@ begin
   cbUFCadastro.ItemIndex :=
     cbUFCadastro.Items.IndexOf(qryConsulta.FieldByName('UF').AsString);
 
-  CarregarCidades(qryConsulta.FieldByName('UF').AsString, cbCidadeCadastro);
+  FCidadeController.CarregarCidades(qryConsulta.FieldByName('UF').AsString, cbCidadeCadastro.Items);
 
   cbCidadeCadastro.ItemIndex :=
     cbCidadeCadastro.Items.IndexOf(
@@ -678,6 +584,23 @@ begin
   );
 end;
 
+procedure TfrmCliente.edtCEPCadastroExit(Sender: TObject);
+begin
+  edtCEPCadastro.Text :=
+    FormatMaskText(
+      '00000\-000;0',
+      FClienteController.ApenasNumeros(
+        edtCEPCadastro.Text
+      )
+    );
+end;
+
+procedure TfrmCliente.edtCEPCadastroKeyPress(Sender: TObject; var Key: Char);
+begin
+  if not (Key in ['0'..'9', #8]) then
+    Key := #0;
+end;
+
 procedure TfrmCliente.edtCEPConsultaChange(Sender: TObject);
 begin
   PreencherEnderecoViaCEP(
@@ -688,150 +611,72 @@ begin
   );
 end;
 
-procedure TfrmCliente.edtCPFCNPJCadastroChange(Sender: TObject);
+procedure TfrmCliente.edtCEPConsultaExit(Sender: TObject);
 begin
-  AplicarMascaraCPFCNPJ(edtCPFCNPJCadastro);
+  edtCEPConsulta.Text :=
+    FormatMaskText(
+      '00000\-000;0',
+      FClienteController.ApenasNumeros(
+        edtCEPConsulta.Text
+      )
+    );
 end;
 
-procedure TfrmCliente.edtCPFCNPJConsultaChange(Sender: TObject);
+procedure TfrmCliente.edtCEPConsultaKeyPress(Sender: TObject; var Key: Char);
 begin
-  AplicarMascaraCPFCNPJ(edtCPFCNPJConsulta);
+  if not (Key in ['0'..'9', #8]) then
+    Key := #0;
+end;
+
+procedure TfrmCliente.edtCPFCNPJCadastroExit(Sender: TObject);
+begin
+  if Length(FClienteController.ApenasNumeros(edtCPFCNPJCadastro.Text)) <= 11 then
+    edtCPFCNPJCadastro.Text :=
+      FormatMaskText(
+        '000\.000\.000\-00;0',
+        edtCPFCNPJCadastro.Text
+      )
+  else
+    edtCPFCNPJCadastro.Text :=
+      FormatMaskText(
+        '00\.000\.000\/0000\-00;0',
+        edtCPFCNPJCadastro.Text
+      );
+end;
+
+procedure TfrmCliente.edtCPFCNPJCadastroKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if not (Key in ['0'..'9', #8]) then
+    Key := #0;
+end;
+
+procedure TfrmCliente.edtCPFCNPJConsultaExit(Sender: TObject);
+begin
+if Length(FClienteController.ApenasNumeros(edtCPFCNPJConsulta.Text)) <= 11 then
+    edtCPFCNPJConsulta.Text :=
+      FormatMaskText(
+        '000\.000\.000\-00;0',
+        edtCPFCNPJConsulta.Text
+      )
+  else
+    edtCPFCNPJConsulta.Text :=
+      FormatMaskText(
+        '00\.000\.000\/0000\-00;0',
+        edtCPFCNPJConsulta.Text
+      );
+end;
+
+procedure TfrmCliente.edtCPFCNPJConsultaKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if not (Key in ['0'..'9', #8]) then
+    Key := #0;
 end;
 
 procedure TfrmCliente.edtNumeroCadastroChange(Sender: TObject);
 begin
   ckSemNumeroCadastro.Checked := Trim(edtNumeroCadastro.Text).IsEmpty;
-end;
-
-function TfrmCliente.ValidarCamposCadastro: Boolean;
-var
-  Controller: TClienteController;
-  ClienteExistente: Boolean;
-begin
-  Result := False;
-
-  if Trim(edtNomeCadastro.Text) = '' then
-  begin
-    ShowMessage('Informe o nome do cliente.');
-    edtNomeCadastro.SetFocus;
-    Exit;
-  end;
-
-  if Trim(edtCPFCNPJCadastro.Text) = '' then
-  begin
-    ShowMessage('Informe o CPF/CNPJ.');
-    edtCPFCNPJCadastro.SetFocus;
-    Exit;
-  end;
-
-  if edtDataNascimentoCadastro.Date > Date then
-  begin
-    ShowMessage('A data de nascimento não pode ser maior que a data atual.');
-    edtDataNascimentoCadastro.SetFocus;
-    Exit;
-  end;
-
-  if Trim(edtEnderecoCadastro.Text) = '' then
-  begin
-    ShowMessage('Informe o endereço.');
-    edtEnderecoCadastro.SetFocus;
-    Exit;
-  end;
-
-  if (not ckSemNumeroCadastro.Checked) and
-     (Trim(edtNumeroCadastro.Text) = '') then
-  begin
-    ShowMessage('Informe o número do endereço.');
-    edtNumeroCadastro.SetFocus;
-    Exit;
-  end;
-
-  if Trim(edtBairroCadastro.Text) = '' then
-  begin
-    ShowMessage('Informe o bairro.');
-    edtBairroCadastro.SetFocus;
-    Exit;
-  end;
-
-  if (cbUFCadastro.ItemIndex = -1) and (Trim(cbUFCadastro.Text).IsEmpty) then
-  begin
-    ShowMessage('Selecione a UF.');
-    cbUFCadastro.SetFocus;
-    Exit;
-  end;
-
-  if (cbCidadeCadastro.ItemIndex = -1) and (Trim(cbCidadeCadastro.Text).IsEmpty) then
-  begin
-    ShowMessage('Selecione a cidade.');
-    cbCidadeCadastro.SetFocus;
-    Exit;
-  end;
-
-  Controller := TClienteController.Create;
-  try
-    ClienteExistente := Controller.ClienteExiste(edtCPFCNPJCadastro.Text);
-
-    if ClienteExistente and (FIdCliente = 0) then
-    begin
-      ShowMessage('Já existe um cliente cadastrado com este CPF/CNPJ.');
-      edtCPFCNPJCadastro.SetFocus;
-      Exit;
-    end;
-
-  finally
-    Controller.Free;
-  end;
-
-  Result := True;
-end;
-
-function TfrmCliente.ValidarExclusao: Boolean;
-begin
-  Result := False;
-
-  if FIdCliente = 0 then
-  begin
-    MessageDlg(
-      'Nenhum cliente selecionado para exclusão.',
-      mtWarning,
-      [mbOK],
-      0
-    );
-    Exit;
-  end;
-
-  if FIdCliente in [1, 5, 8, 10, 15] then
-  begin
-    MessageDlg(
-      'Este cliente não pode ser excluído.',
-      mtWarning,
-      [mbOK],
-      0
-    );
-    Exit;
-  end;
-
-  Result := True;
-end;
-
-procedure TfrmCliente.VerificaESalvaCidade(mCliente: TCliente);
-var
-  CidadeDAO: TCidadeDAO;
-  CidadeID: Integer;
-begin
-  CidadeDAO := TCidadeDAO.Create;
-
-  try
-    CidadeID := CidadeDAO.BuscarCidade(cbCidadeCadastro.Text, cbUFCadastro.Text);
-
-    if CidadeID = 0 then
-      CidadeID := CidadeDAO.InserirCidade(cbCidadeCadastro.Text, cbUFCadastro.Text);
-
-    mCliente.Cidade := CidadeID;
-
-  finally
-    CidadeDAO.Free;
-  end;
 end;
 
 end.

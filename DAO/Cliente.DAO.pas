@@ -34,9 +34,12 @@ type
     procedure Inserir(mCliente: TCliente);
     procedure Alterar(mCliente: TCliente);
     procedure Excluir(mId: Integer);
-    procedure ListarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente);
+    procedure BuscarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente);
     function ContarClientes: Integer;
     function ClienteExiste(mCPFCNPJ: String): Boolean;
+    function MontarCliente(mId, mCidade: Integer; mNome, mCEP, mCPFCNPJ, mEndereco, mNumero,
+                           mComplemento, mBairro: String; mDataNascimento: TDate): TCliente;
+
   end;
 
 implementation
@@ -93,6 +96,25 @@ begin
   finally
     Qry.Free;
   end;
+end;
+
+function TClienteDAO.MontarCliente(mId, mCidade: Integer; mNome, mCEP, mCPFCNPJ,
+  mEndereco, mNumero, mComplemento, mBairro: String;
+  mDataNascimento: TDate): TCliente;
+begin
+  Result := TCliente.Create;
+  Result.ID := mId;
+  Result.Nome := mNome;
+  Result.CEP     := mCEP;
+  Result.CPFCNPJ := mCPFCNPJ;
+  Result.Endereco := mEndereco;
+  Result.Numero := mNumero;
+  Result.Complemento := mComplemento;
+  Result.Bairro := mBairro;
+  Result.DataNascimento := mDataNascimento;
+
+  if mCidade >= 0 then
+    Result.Cidade := mCidade
 end;
 
 procedure TClienteDAO.Alterar(mCliente: TCliente);
@@ -194,7 +216,7 @@ begin
   end;
 end;
 
-procedure TClienteDAO.ListarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente);
+procedure TClienteDAO.BuscarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente);
 begin
   mQuery.Close;
   mQuery.SQL.Clear;
