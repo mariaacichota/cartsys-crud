@@ -4,7 +4,6 @@ interface
 
 uses
   System.SysUtils,
-  FireDAC.Comp.Client,
   Conexao.DAO;
 
 type
@@ -17,8 +16,8 @@ type
 type
   TRelatorioDAO = class
   public
-    function GerarSQLRelatorio(mIdInicial, mIdFinal: Integer;
-                               mCidades, mUFs: String; mTipoFiltro: TTipoFiltroRelatorio): String;
+    function GerarSQLRelatorio(mIdInicial, mIdFinal: Integer; mCidades, mUFs: String;
+                               mTipoFiltro: TTipoFiltroRelatorio): String;
   end;
 
 implementation
@@ -44,43 +43,46 @@ begin
     '      '''' ' +
     '    ) ' +
     '  ) AS ENDERECO_COMPLETO, ' +
+
     '  CID.NOME AS CIDADE, ' +
     '  EST.UF ' +
+
     'FROM CLIENTE C ' +
     'LEFT JOIN CIDADE CID ON CID.ID = C.CIDADE ' +
     'LEFT JOIN ESTADO EST ON EST.ID = CID.ESTADOID ' +
-    'WHERE 1=1 ';
+    'WHERE 1 = 1 ';
 
   case mTipoFiltro of
+
     tfTodos:
       begin
-        // Sem filtros
+       ///
       end;
 
     tfFaixaID:
       begin
         if mIdInicial > 0 then
           Result := Result +
-            'AND C.ID >= ' + IntToStr(mIdInicial) + ' ';
+            ' AND C.ID >= ' + IntToStr(mIdInicial);
 
         if mIdFinal > 0 then
           Result := Result +
-            'AND C.ID <= ' + IntToStr(mIdFinal) + ' ';
+            ' AND C.ID <= ' + IntToStr(mIdFinal);
       end;
 
     tfCidadeEstado:
       begin
         if Trim(mUFs) <> '' then
           Result := Result +
-            'AND EST.UF IN (' + mUFs + ') ';
+            ' AND EST.UF IN (' + mUFs + ')';
 
         if Trim(mCidades) <> '' then
           Result := Result +
-            'AND CID.NOME IN (' + mCidades + ') ';
+            ' AND CID.NOME IN (' + mCidades + ')';
       end;
   end;
 
-  Result := Result + 'ORDER BY C.NOME';
+  Result := Result + ' ORDER BY C.NOME';
 end;
 
 end.

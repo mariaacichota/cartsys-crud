@@ -22,11 +22,12 @@ type
   TClienteController = class
   public
     function BuscarCEP(const mCEP: String; out mEndereco: TEnderecoDTO): Boolean;
-    function ValidarCPFCNPJ(const mDocumento: String): Boolean;
     function ClienteExiste(mCPFCNPJ: String): Boolean;
-    function ApenasNumeros(const mTexto: String): String;
     function ListarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente): TFDQuery;
-  private
+
+    function ApenasNumeros(const mTexto: String): String;
+
+    function ValidarCPFCNPJ(const mDocumento: String): Boolean;
     function ValidarCNPJAPI(const mCNPJ: String): Boolean;
     function ValidarCPF(const mCPF: String): Boolean;
   end;

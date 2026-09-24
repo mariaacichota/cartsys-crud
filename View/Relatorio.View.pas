@@ -11,9 +11,9 @@ uses
   FireDAC.Stan.Async, FireDAC.DApt, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
   ppDB, ppDBPipe, ppComm, ppRelatv, ppProd, ppClass, ppReport, ppVar,
   ppCtrls, ppPrnabl, ppBands, ppCache, ppDesignLayer, ppParameter,
-  Estado.DAO, Cidade.DAO, Relatorio.DAO, Conexao.DAO, AdvGlassButton,
-  AdvGlowButton, CurvyControls, AdvSmoothButton, Vcl.Imaging.pngimage,
-  AdvSmoothPanel, ppViewr;
+  AdvGlassButton, AdvGlowButton, CurvyControls, AdvSmoothButton, Vcl.Imaging.pngimage,
+  AdvSmoothPanel, ppViewr,
+  Conexao.DAO, Relatorio.DAO, Relatorio.Controller;
 
 type
   TfrmRelatorio = class(TForm)
@@ -66,12 +66,12 @@ type
     procedure btnVisualizarRelatorioClick(Sender: TObject);
     procedure btnImprimirRelatorioClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormDestroy(Sender: TObject);
 
   private
-    procedure ValidarFiltros;
+    FRelatorioController: TRelatorioController;
+
     procedure CarregarRelatorio;
-    procedure CarregarUFs;
-    procedure CarregarCidades(mUF: String);
     function ItensMarcados(mCheck: TCheckListBox): String;
     function ObterTipoFiltro: TTipoFiltroRelatorio;
   end;
@@ -88,139 +88,60 @@ begin
   Close;
 end;
 
-procedure TfrmRelatorio.CarregarCidades(mUF: String);
-var
-  DAO: TCidadeDAO;
-  Qry: TFDQuery;
-begin
-  DAO := TCidadeDAO.Create;
-  try
-    Qry := DAO.ListarPorEstado(mUF);
-    try
-      if ckcbUF.SelCount = 1 then
-        ckcbCidade.Items.Clear;
-
-      while not Qry.Eof do
-        begin
-          ckcbCidade.Items.AddObject(
-            Qry.FieldByName('NOME').AsString,
-            TObject(Qry.FieldByName('ID').AsInteger));
-
-          Qry.Next;
-        end;
-
-    finally
-      Qry.Free;
-    end;
-
-  finally
-    DAO.Free;
-  end;
-end;
-
 procedure TfrmRelatorio.CarregarRelatorio;
-var
-  DAO: TRelatorioDAO;
 begin
-  ValidarFiltros;
+  FRelatorioController.ValidarFiltros(
+    ObterTipoFiltro,
+    edtIdInicial.Text,
+    edtIdFinal.Text,
+    ItensMarcados(ckcbCidade),
+    ItensMarcados(ckcbUF)
+  );
 
-  DAO := TRelatorioDAO.Create;
-  try
-    qryRelatorioClientes.Close;
+  qryRelatorioClientes.Close;
 
-    qryRelatorioClientes.SQL.Text :=
-      DAO.GerarSQLRelatorio(
-        StrToIntDef(edtIdInicial.Text, 0),
-        StrToIntDef(edtIdFinal.Text, 0),
-        ItensMarcados(ckcbCidade),
-        ItensMarcados(ckcbUF),
-        ObterTipoFiltro
-      );
+  qryRelatorioClientes.SQL.Text :=
+    FRelatorioController.GerarSQLRelatorio(
+      ObterTipoFiltro,
+      StrToIntDef(edtIdInicial.Text, 0),
+      StrToIntDef(edtIdFinal.Text, 0),
+      ItensMarcados(ckcbCidade),
+      ItensMarcados(ckcbUF)
+    );
 
-    qryRelatorioClientes.Open;
+  qryRelatorioClientes.Open;
 
-    if qryRelatorioClientes.IsEmpty then
-      raise Exception.Create(
-        'Nenhum registro encontrado para os filtros informados.'
-      );
-
-  finally
-    DAO.Free;
-  end;
-end;
-
-procedure TfrmRelatorio.CarregarUFs;
-var
-  DAO: TEstadoDAO;
-  Qry: TFDQuery;
-begin
-  DAO := TEstadoDAO.Create;
-
-  try
-    Qry := DAO.ListarEstados;
-    try
-      ckcbUF.Items.Clear;
-
-      while not Qry.Eof do
-        begin
-          ckcbUF.Items.Add(Qry.FieldByName('UF').AsString);
-          Qry.Next;
-        end;
-
-    finally
-      Qry.Free;
-    end;
-
-  finally
-    DAO.Free;
-  end;
+  if qryRelatorioClientes.IsEmpty then
+    raise Exception.Create(
+      'Nenhum registro encontrado para os filtros informados.'
+    );
 end;
 
 procedure TfrmRelatorio.ckcbUFClickCheck(Sender: TObject);
-var
-  DAO: TCidadeDAO;
-  Qry: TFDQuery;
-  I: Integer;
 begin
-  if ckcbUF.SelCount = 1 then
-    ckcbCidade.Items.Clear;
-
-  DAO := TCidadeDAO.Create;
-  try
-    for I := 0 to ckcbUF.Count - 1 do
-    begin
-      if ckcbUF.Checked[I] then
-      begin
-        Qry := DAO.ListarPorEstado(ckcbUF.Items[I]);
-        try
-          while not Qry.Eof do
-            begin
-              if ckcbCidade.Items.IndexOf(Qry.FieldByName('NOME').AsString) = -1 then
-                ckcbCidade.Items.Add(Qry.FieldByName('NOME').AsString);
-              
-              Qry.Next;
-            end;
-
-        finally
-          Qry.Free;
-        end;
-      end;
-    end;
-
-  finally
-    DAO.Free;
-  end;
+  FRelatorioController.CarregarCidadesPorUFs(
+    ckcbUF,
+    ckcbCidade.Items
+  );
 end;
 
 procedure TfrmRelatorio.FormCreate(Sender: TObject);
 begin
+  FRelatorioController := TRelatorioController.Create;
+
   qryRelatorioClientes.Connection := TConexao.GetConnection;
+
   viewRelatorioClientes.Report := ppRelatorioClientes;
 
-  CarregarUFs;
+  FRelatorioController.CarregarUFs(ckcbUF.Items);
 
   rdgFiltrosRelatorio.ItemIndex := 0;
   rdgFiltrosRelatorioClick(nil);
+end;
+
+procedure TfrmRelatorio.FormDestroy(Sender: TObject);
+begin
+  FRelatorioController.Free;
 end;
 
 procedure TfrmRelatorio.FormKeyDown(Sender: TObject; var Key: Word;
@@ -275,31 +196,6 @@ begin
   edtIdFinal.Enabled := rdgFiltrosRelatorio.ItemIndex = 1;
   ckcbCidade.Enabled := rdgFiltrosRelatorio.ItemIndex = 2;
   ckcbUF.Enabled := rdgFiltrosRelatorio.ItemIndex = 2;
-end;
-
-procedure TfrmRelatorio.ValidarFiltros;
-begin
-  case ObterTipoFiltro of
-
-    tfFaixaID:
-      begin
-        if (Trim(edtIdInicial.Text) = '') and
-           (Trim(edtIdFinal.Text) = '') then
-          raise Exception.Create(
-            'Informe o ID Inicial e/ou ID Final.'
-          );
-      end;
-
-    tfCidadeEstado:
-      begin
-        if (ItensMarcados(ckcbCidade) = '') and
-           (ItensMarcados(ckcbUF) = '') then
-          raise Exception.Create(
-            'Selecione ao menos uma cidade ou UF.'
-          );
-      end;
-
-  end;
 end;
 
 procedure TfrmRelatorio.btnImprimirRelatorioClick(Sender: TObject);

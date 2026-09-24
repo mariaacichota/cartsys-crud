@@ -124,6 +124,7 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="Controller\Cliente.Controller.pas"/>
+        <DCCReference Include="Controller\Relatorio.Controller.pas"/>
         <DCCReference Include="Model\Cidade.Model.pas"/>
         <DCCReference Include="Model\Cliente.Model.pas"/>
         <DCCReference Include="Model\Estado.Model.pas"/>

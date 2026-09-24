@@ -13,6 +13,7 @@ object frmRelatorio: TfrmRelatorio
   Font.Style = []
   KeyPreview = True
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   TextHeight = 15
   object pnlGeral: TPanel
@@ -386,7 +387,7 @@ object frmRelatorio: TfrmRelatorio
     CloudDriveSettings.OneDriveSettings.OAuth2.RefreshTokenLifeSpan = 365
     CloudDriveSettings.OneDriveSettings.DirectorySupport = True
     CloudDriveSettings.OneDriveSettings.SharedResources = True
-    Left = 248
+    Left = 544
     Top = 224
     Version = '23.04'
     mmColumnWidth = 0
@@ -6649,16 +6650,16 @@ object frmRelatorio: TfrmRelatorio
   object ppDBRelatorioClientes: TppDBPipeline
     DataSource = dsRelatorioClientes
     UserName = 'DBRelatorioClientes'
-    Left = 96
+    Left = 448
     Top = 224
   end
   object dsRelatorioClientes: TDataSource
     DataSet = qryRelatorioClientes
-    Left = 176
-    Top = 224
+    Left = 600
+    Top = 216
   end
   object qryRelatorioClientes: TFDQuery
-    Left = 16
+    Left = 488
     Top = 224
   end
 end
