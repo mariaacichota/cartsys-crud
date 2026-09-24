@@ -8,20 +8,31 @@ uses
   Cliente.Model, Conexao.DAO;
 
 type
+  TFiltroCliente = record
+    ID: Integer;
+    Nome: String;
+    CPFCNPJ: String;
+    CEP: String;
+    DataNascimento: TDate;
+    UF: String;
+    Cidade: String;
+  end;
+
+type
   TClienteDAO = class
   public
     procedure Inserir(mCliente: TCliente);
     procedure Alterar(mCliente: TCliente);
     procedure Excluir(mId: Integer);
-
-    function BuscarPorNome(mNome: String): TFDQuery;
-    function BuscarPorID(mId: Integer): TFDQuery;
-    function BuscarPorCPFCNPJ(mCPFCNPJ: String): TFDQuery;
+    procedure ListarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente);
     function ContarClientes: Integer;
-    function ListarTodos: TFDQuery;
+    function ClienteExiste(mCPFCNPJ: String): Boolean;
   end;
 
 implementation
+
+uses
+  Vcl.Dialogs;
 
 procedure TClienteDAO.Inserir(mCliente: TCliente);
 var
@@ -29,13 +40,10 @@ var
   Conn: TFDConnection;
 begin
   Conn := TConexao.GetConnection;
-
   Qry := TFDQuery.Create(nil);
   try
     Qry.Connection := Conn;
-
     Conn.StartTransaction;
-
     try
       Qry.SQL.Text :=
         'INSERT INTO CLIENTE (' +
@@ -56,7 +64,6 @@ begin
       Qry.ParamByName('BAIRRO').AsString := mCliente.Bairro;
       Qry.ParamByName('CIDADE').AsInteger := mCliente.Cidade;
       Qry.ParamByName('DATANASCIMENTO').AsDate := mCliente.DataNascimento;
-
       Qry.ExecSQL;
 
       Conn.Commit;
@@ -177,75 +184,99 @@ begin
   end;
 end;
 
-function TClienteDAO.BuscarPorID(mId: Integer): TFDQuery;
+procedure TClienteDAO.ListarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente);
 begin
-  Result := TFDQuery.Create(nil);
+  mQuery.Close;
+  mQuery.SQL.Clear;
 
-  Result.Connection := TConexao.GetConnection;
-
-  Result.SQL.Text :=
-    'SELECT * FROM CLIENTE ' +
-    'WHERE ID = :ID';
-
-  Result.ParamByName('ID').AsInteger := mId;
-
-  Result.Open;
-end;
-
-function TClienteDAO.ListarTodos: TFDQuery;
-begin
-  Result := TFDQuery.Create(nil);
-
-  Result.Connection := TConexao.GetConnection;
-
-  Result.SQL.Text :=
-    'SELECT * FROM CLIENTE ' +
-    'ORDER BY NOME';
-
-  Result.Open;
-end;
-
-function TClienteDAO.BuscarPorCPFCNPJ(mCPFCNPJ: String): TFDQuery;
-begin
-  Result := TFDQuery.Create(nil);
-
-  Result.Connection := TConexao.GetConnection;
-
-  Result.SQL.Text :=
+  mQuery.SQL.Add(
     'SELECT ' +
-    '  C.*, ' +
-    '  CID.NOME AS NOME_CIDADE, ' +
-    '  EST.UF ' +
-    'FROM CLIENTE C ' +
-    '  LEFT JOIN CIDADE CID ON CID.ID = C.CIDADE ' +
-    '  LEFT JOIN ESTADO EST ON EST.ID = CID.ESTADOID ' +
-    'WHERE C.CPF_CNPJ = :CPF_CNPJ';
-
-  Result.ParamByName('CPF_CNPJ').AsString := mCPFCNPJ;
-
-  Result.Open;
-end;
-
-function TClienteDAO.BuscarPorNome(mNome: String): TFDQuery;
-begin
-  Result := TFDQuery.Create(nil);
-
-  Result.Connection := TConexao.GetConnection;
-
-  Result.SQL.Text :=
-    'SELECT ' +
-    '  C.*, ' +
-    '  CID.NOME AS NOME_CIDADE, ' +
+    '  C.ID, ' +
+    '  C.NOME, ' +
+    '  C.CPF_CNPJ, ' +
+    '  C.DATANASCIMENTO, ' +
+    '  C.CEP, ' +
+    '  C.ENDERECO, ' +
+    '  C.NUMERO, ' +
+    '  C.COMPLEMENTO, ' +
+    '  C.BAIRRO, ' +
+    '  CID.NOME AS CIDADE, ' +
     '  EST.UF ' +
     'FROM CLIENTE C ' +
     'LEFT JOIN CIDADE CID ON CID.ID = C.CIDADE ' +
     'LEFT JOIN ESTADO EST ON EST.ID = CID.ESTADOID ' +
-    'WHERE UPPER(C.NOME) CONTAINING UPPER(:NOME) ' +
-    'ORDER BY C.NOME';
+    'WHERE 1=1 ');
 
-  Result.ParamByName('NOME').AsString := mNome;
+  if mFiltro.ID > 0 then
+    mQuery.SQL.Add(
+      'AND C.ID = ' + IntToStr(mFiltro.ID)
+    );
 
-  Result.Open;
+  if Trim(mFiltro.Nome) <> '' then
+    mQuery.SQL.Add(
+      'AND UPPER(C.NOME) LIKE ' +
+      QuotedStr('%' + UpperCase(mFiltro.Nome) + '%')
+    );
+
+  if Trim(mFiltro.CPFCNPJ) <> '' then
+    mQuery.SQL.Add(
+      'AND C.CPF_CNPJ = ' +
+      QuotedStr(mFiltro.CPFCNPJ)
+    );
+
+  if Trim(mFiltro.CEP) <> '' then
+    mQuery.SQL.Add(
+      'AND C.CEP = ' +
+      QuotedStr(mFiltro.CEP)
+    );
+
+  if Trim(mFiltro.UF) <> '' then
+    mQuery.SQL.Add(
+      'AND EST.UF = ' +
+      QuotedStr(mFiltro.UF)
+    );
+
+  if Trim(mFiltro.Cidade) <> '' then
+    mQuery.SQL.Add(
+      'AND CID.NOME = ' +
+      QuotedStr(mFiltro.Cidade)
+    );
+
+  if mFiltro.DataNascimento > 0 then
+    mQuery.SQL.Add(
+      'AND C.DATANASCIMENTO = ' +
+      QuotedStr(
+        FormatDateTime('yyyy-mm-dd', mFiltro.DataNascimento)
+      )
+    );
+
+  mQuery.SQL.Add('ORDER BY C.NOME');
+
+  mQuery.Open;
+end;
+
+function TClienteDAO.ClienteExiste(mCPFCNPJ: String): Boolean;
+var
+  Qry: TFDQuery;
+begin
+  Result := False;
+
+  Qry := TFDQuery.Create(nil);
+  try
+    Qry.Connection := TConexao.GetConnection;
+
+    Qry.SQL.Text :=
+      'SELECT ID ' +
+      'FROM CLIENTE ' +
+      'WHERE CPF_CNPJ = ' +
+      QuotedStr(mCPFCNPJ);
+
+    Qry.Open;
+
+    Result := not Qry.IsEmpty;
+  finally
+    Qry.Free;
+  end;
 end;
 
 function TClienteDAO.ContarClientes: Integer;

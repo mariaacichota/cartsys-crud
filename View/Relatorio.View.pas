@@ -19,34 +19,33 @@ type
   TfrmRelatorio = class(TForm)
     pnlGeral: TPanel;
     pnlFooter: TPanel;
-    ppReport1: TppReport;
-    ppDBPipeline1: TppDBPipeline;
-    dsRelatorio: TDataSource;
-    qryRelatorio: TFDQuery;
+    ppRelatorioClientes: TppReport;
+    ppDBRelatorioClientes: TppDBPipeline;
+    dsRelatorioClientes: TDataSource;
+    qryRelatorioClientes: TFDQuery;
     ppParameterList1: TppParameterList;
     ppDesignLayers1: TppDesignLayers;
     ppDesignLayer1: TppDesignLayer;
-    ppHeaderBand1: TppHeaderBand;
-    ppDetailBand1: TppDetailBand;
-    ppFooterBand1: TppFooterBand;
-    ppLabel7: TppLabel;
-    ppLabel1: TppLabel;
-    ppLine1: TppLine;
-    ppLabel2: TppLabel;
-    ppLabel3: TppLabel;
-    ppLabel4: TppLabel;
-    ppLabel5: TppLabel;
-    ppLabel6: TppLabel;
-    ppDBText1: TppDBText;
-    ppDBText6: TppDBText;
-    ppDBText5: TppDBText;
-    ppDBText4: TppDBText;
-    ppDBText3: TppDBText;
-    ppDBText2: TppDBText;
-    ppSystemVariable1: TppSystemVariable;
-    ppSystemVariable2: TppSystemVariable;
-    ppImage1: TppImage;
-    ppViewer1: TppViewer;
+    bandDetail: TppDetailBand;
+    bandFooter: TppFooterBand;
+    lblCabecalhoUF: TppLabel;
+    lblCabecalhoTitulo: TppLabel;
+    lnDivCabecalho: TppLine;
+    lblCabecalhoID: TppLabel;
+    lblCabecalhoNome: TppLabel;
+    lblCabecalhoCPFCNPJ: TppLabel;
+    lblCabecalhoEndereco: TppLabel;
+    lblCabecalhoCidade: TppLabel;
+    txtID: TppDBText;
+    txtUF: TppDBText;
+    txtCidade: TppDBText;
+    txtEnderecoCompleto: TppDBText;
+    txtCPFCNPJ: TppDBText;
+    txtNome: TppDBText;
+    svData: TppSystemVariable;
+    svPage: TppSystemVariable;
+    imgLogo: TppImage;
+    viewRelatorioClientes: TppViewer;
     pnlDadosFiltro: TAdvSmoothPanel;
     ckcbCidade: TCheckListBox;
     ckcbUF: TCheckListBox;
@@ -59,12 +58,14 @@ type
     rdgFiltrosRelatorio: TRadioGroup;
     btnVisualizarRelatorio: TAdvSmoothButton;
     btnImprimirRelatorio: TAdvSmoothButton;
+    bandHeader: TppHeaderBand;
     procedure ckcbUFClickCheck(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnFecharClick(Sender: TObject);
     procedure rdgFiltrosRelatorioClick(Sender: TObject);
     procedure btnVisualizarRelatorioClick(Sender: TObject);
     procedure btnImprimirRelatorioClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 
   private
     procedure ValidarFiltros;
@@ -125,9 +126,9 @@ begin
 
   DAO := TRelatorioDAO.Create;
   try
-    qryRelatorio.Close;
+    qryRelatorioClientes.Close;
 
-    qryRelatorio.SQL.Text :=
+    qryRelatorioClientes.SQL.Text :=
       DAO.GerarSQLRelatorio(
         StrToIntDef(edtIdInicial.Text, 0),
         StrToIntDef(edtIdFinal.Text, 0),
@@ -136,9 +137,9 @@ begin
         ObterTipoFiltro
       );
 
-    qryRelatorio.Open;
+    qryRelatorioClientes.Open;
 
-    if qryRelatorio.IsEmpty then
+    if qryRelatorioClientes.IsEmpty then
       raise Exception.Create(
         'Nenhum registro encontrado para os filtros informados.'
       );
@@ -213,13 +214,26 @@ end;
 
 procedure TfrmRelatorio.FormCreate(Sender: TObject);
 begin
-  qryRelatorio.Connection := TConexao.GetConnection;
-  ppViewer1.Report := ppReport1;
+  qryRelatorioClientes.Connection := TConexao.GetConnection;
+  viewRelatorioClientes.Report := ppRelatorioClientes;
 
   CarregarUFs;
 
   rdgFiltrosRelatorio.ItemIndex := 0;
   rdgFiltrosRelatorioClick(nil);
+end;
+
+procedure TfrmRelatorio.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  inherited;
+
+  if (Key = VK_RETURN) and
+     not (ActiveControl is TCustomButton) then
+  begin
+    Key := 0;
+    Perform(WM_NEXTDLGCTL, 0, 0);
+  end;
 end;
 
 function TfrmRelatorio.ItensMarcados(mCheck: TCheckListBox): String;
@@ -291,11 +305,11 @@ end;
 procedure TfrmRelatorio.btnImprimirRelatorioClick(Sender: TObject);
 begin
   try
-    if qryRelatorio.IsEmpty then
+    if qryRelatorioClientes.IsEmpty then
       CarregarRelatorio;
 
-    ppReport1.DeviceType := 'Printer';
-    ppReport1.Print;
+    ppRelatorioClientes.DeviceType := 'Printer';
+    ppRelatorioClientes.Print;
 
   except
     on E: Exception do
@@ -313,8 +327,8 @@ begin
   try
     CarregarRelatorio;
 
-    ppReport1.DeviceType := 'Screen';
-    ppReport1.Print;
+    ppRelatorioClientes.DeviceType := 'Screen';
+    ppRelatorioClientes.Print;
 
   except
     on E: Exception do

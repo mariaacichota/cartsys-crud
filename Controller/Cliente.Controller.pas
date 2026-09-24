@@ -23,8 +23,9 @@ type
   public
     function BuscarCEP(const mCEP: String; out mEndereco: TEnderecoDTO): Boolean;
     function ValidarCPFCNPJ(const mDocumento: String): Boolean;
-    function ClienteExiste(mCPFCNPJ: String; out mQry: TFDQuery): Boolean;
+    function ClienteExiste(mCPFCNPJ: String): Boolean;
     function ApenasNumeros(const mTexto: String): String;
+    function ListarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente): TFDQuery;
   private
     function ValidarCNPJAPI(const mCNPJ: String): Boolean;
     function ValidarCPF(const mCPF: String): Boolean;
@@ -221,16 +222,28 @@ begin
     Result := False;
 end;
 
-function TClienteController.ClienteExiste(mCPFCNPJ: String; out mQry: TFDQuery): Boolean;
+function TClienteController.ClienteExiste(mCPFCNPJ: String): Boolean;
 var
   DAO: TClienteDAO;
 begin
   DAO := TClienteDAO.Create;
-
   try
-    mQry := DAO.BuscarPorCPFCNPJ(ApenasNumeros(mCPFCNPJ));
-    Result := not mQry.IsEmpty;
+    Result := DAO.ClienteExiste(ApenasNumeros(mCPFCNPJ));
+  finally
+    DAO.Free;
+  end;
+end;
 
+function TClienteController.ListarClientes(mQuery: TFDQuery; mFiltro: TFiltroCliente): TFDQuery;
+var
+  DAO: TClienteDAO;
+begin
+  DAO := TClienteDAO.Create;
+  try
+    DAO.ListarClientes(
+      mQuery,
+      mFiltro
+    );
   finally
     DAO.Free;
   end;

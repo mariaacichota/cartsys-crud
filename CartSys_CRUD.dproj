@@ -129,15 +129,12 @@
         <DCCReference Include="Model\Estado.Model.pas"/>
         <DCCReference Include="View\Cliente.View.pas">
             <Form>frmCliente</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="View\Principal.View.pas">
             <Form>frmPrincipal</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="View\Relatorio.View.pas">
             <Form>frmRelatorio</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="DAO\Relatorio.DAO.pas"/>
         <DCCReference Include="DAO\Cidade.DAO.pas"/>
